@@ -28,19 +28,62 @@ const MICROINSTRUCTIONS_MAP: Record<string, Microinstruction[]> = {
     { id: 3, name: "Read Source", phase: "execute", signals: ["BX→TempReg"], duration: 600 },
     { id: 4, name: "Write Destination", phase: "writeback", signals: ["TempReg→AX"], duration: 600 },
   ],
+  "MOV R1, (R2)": [
+    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
+    { id: 2, name: "Decode Addressing", phase: "decode", signals: ["IR→CU", "CU→RegSelect"], duration: 800 },
+    { id: 3, name: "Read Address", phase: "execute", signals: ["R2→MAR"], duration: 600 },
+    { id: 4, name: "Memory Access", phase: "execute", signals: ["MEM→MDR"], duration: 800 },
+    { id: 5, name: "Store Data", phase: "writeback", signals: ["MDR→R1"], duration: 600 },
+  ],
+  "MOV (R1), R2": [
+    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
+    { id: 2, name: "Decode Addressing", phase: "decode", signals: ["IR→CU", "CU→RegSelect"], duration: 800 },
+    { id: 3, name: "Setup Address", phase: "execute", signals: ["R1→MAR"], duration: 600 },
+    { id: 4, name: "Setup Data", phase: "execute", signals: ["R2→MDR"], duration: 600 },
+    { id: 5, name: "Memory Write", phase: "writeback", signals: ["MDR→MEM"], duration: 800 },
+  ],
+  "ADD R1, (R2)": [
+    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
+    { id: 2, name: "Decode Operation", phase: "decode", signals: ["IR→CU", "CU→RegSelect"], duration: 800 },
+    { id: 3, name: "Read Memory Address", phase: "execute", signals: ["R2→MAR"], duration: 600 },
+    { id: 4, name: "Fetch Operand", phase: "execute", signals: ["MEM→MDR", "MDR→Y"], duration: 800 },
+    { id: 5, name: "ALU Addition", phase: "execute", signals: ["R1→ALU_A", "Y→ALU_B", "ALU_ADD"], duration: 1000 },
+    { id: 6, name: "Update Flags", phase: "execute", signals: ["ALU_FLAGS→FLAGS"], duration: 400 },
+    { id: 7, name: "Store Result", phase: "writeback", signals: ["ALU→R1"], duration: 600 },
+  ],
   "ADD AX, 1000H": [
     { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
     { id: 2, name: "Fetch Immediate", phase: "fetch", signals: ["PC+1→MAR", "MEM→MDR"], duration: 1000 },
-    { id: 3, name: "Decode Operation", phase: "decode", signals: ["IR→CU", "MDR→ALU_B"], duration: 800 },
-    { id: 4, name: "ALU Addition", phase: "execute", signals: ["AX→ALU_A", "ALU_ADD", "ALU→TempReg"], duration: 1200 },
+    { id: 3, name: "Decode Operation", phase: "decode", signals: ["IR→CU", "MDR→Y"], duration: 800 },
+    { id: 4, name: "ALU Addition", phase: "execute", signals: ["AX→ALU_A", "Y→ALU_B", "ALU_ADD"], duration: 1200 },
     { id: 5, name: "Update Flags", phase: "execute", signals: ["ALU_FLAGS→FLAGS"], duration: 400 },
-    { id: 6, name: "Store Result", phase: "writeback", signals: ["TempReg→AX"], duration: 600 },
+    { id: 6, name: "Store Result", phase: "writeback", signals: ["ALU→AX"], duration: 600 },
+  ],
+  "SUB R1, R2": [
+    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
+    { id: 2, name: "Decode Operands", phase: "decode", signals: ["IR→CU", "CU→RegSelect"], duration: 800 },
+    { id: 3, name: "Setup ALU", phase: "execute", signals: ["R1→ALU_A", "R2→ALU_B"], duration: 600 },
+    { id: 4, name: "ALU Subtraction", phase: "execute", signals: ["ALU_SUB", "ALU→Z"], duration: 1000 },
+    { id: 5, name: "Update Flags", phase: "execute", signals: ["ALU_FLAGS→FLAGS"], duration: 400 },
+    { id: 6, name: "Store Result", phase: "writeback", signals: ["Z→R1"], duration: 600 },
+  ],
+  "CMP R1, R2": [
+    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
+    { id: 2, name: "Decode Compare", phase: "decode", signals: ["IR→CU", "CU→RegSelect"], duration: 800 },
+    { id: 3, name: "ALU Compare", phase: "execute", signals: ["R1→ALU_A", "R2→ALU_B", "ALU_SUB"], duration: 1000 },
+    { id: 4, name: "Update Flags Only", phase: "execute", signals: ["ALU_FLAGS→FLAGS"], duration: 600 },
   ],
   "JMP 2000H": [
     { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
     { id: 2, name: "Fetch Address", phase: "fetch", signals: ["PC+1→MAR", "MEM→MDR"], duration: 1000 },
-    { id: 3, name: "Decode Jump", phase: "decode", signals: ["IR→CU", "MDR→TempReg"], duration: 800 },
-    { id: 4, name: "Update PC", phase: "execute", signals: ["TempReg→PC"], duration: 600 },
+    { id: 3, name: "Decode Jump", phase: "decode", signals: ["IR→CU", "MDR→TEMP"], duration: 800 },
+    { id: 4, name: "Update PC", phase: "execute", signals: ["TEMP→PC"], duration: 600 },
+  ],
+  "JZ 3000H": [
+    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
+    { id: 2, name: "Fetch Address", phase: "fetch", signals: ["PC+1→MAR", "MEM→MDR"], duration: 1000 },
+    { id: 3, name: "Check Zero Flag", phase: "decode", signals: ["IR→CU", "FLAGS→CU"], duration: 800 },
+    { id: 4, name: "Conditional Jump", phase: "execute", signals: ["MDR→TEMP", "TEMP→PC"], duration: 600 },
   ]
 };
 
@@ -136,7 +179,7 @@ export const MicroinstructionSequencer = ({
   return (
     <div className="space-y-4">
       {/* Control Buttons */}
-      <div className="flex gap-2 justify-center">
+      <div className="flex flex-wrap gap-2 justify-center">
         <Button
           onClick={handleStart}
           disabled={isExecuting}
@@ -178,7 +221,7 @@ export const MicroinstructionSequencer = ({
           isExecuting ? "border-primary animate-control-pulse" : "border-border",
           "bg-gradient-to-r from-card to-muted/20"
         )}>
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-2">
             <h4 className="font-mono text-sm font-bold text-primary">
               Step {currentMicroinstruction + 1} of {microinstructions.length}
             </h4>

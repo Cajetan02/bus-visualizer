@@ -11,12 +11,15 @@ interface InstructionEditorProps {
 }
 
 const SAMPLE_INSTRUCTIONS = [
-  { name: "MOV AX, BX", description: "Move BX to AX", microops: ["Fetch Operands", "Execute Move", "Update Flags"] },
-  { name: "ADD AX, 1000H", description: "Add immediate value to AX", microops: ["Fetch Immediate", "ALU Add", "Update Flags", "Store Result"] },
-  { name: "JMP 2000H", description: "Jump to address 2000H", microops: ["Calculate Address", "Update IP"] },
-  { name: "CMP AX, BX", description: "Compare AX with BX", microops: ["Fetch Operands", "ALU Compare", "Update Flags"] },
-  { name: "PUSH AX", description: "Push AX to stack", microops: ["Decrement SP", "Store to Stack"] },
-  { name: "POP BX", description: "Pop from stack to BX", microops: ["Load from Stack", "Increment SP"] }
+  { name: "MOV AX, BX", description: "Move register BX to AX", microops: ["Fetch Instruction", "Decode Operands", "Read Source", "Write Destination"] },
+  { name: "MOV R1, (R2)", description: "Move memory contents at R2 to R1", microops: ["Fetch Instruction", "Decode Addressing", "Read Address", "Memory Access", "Store Data"] },
+  { name: "MOV (R1), R2", description: "Move R2 to memory location at R1", microops: ["Fetch Instruction", "Decode Addressing", "Setup Address", "Setup Data", "Memory Write"] },
+  { name: "ADD R1, (R2)", description: "Add memory contents at R2 to R1", microops: ["Fetch Instruction", "Decode Operation", "Read Memory Address", "Fetch Operand", "ALU Addition", "Update Flags", "Store Result"] },
+  { name: "ADD AX, 1000H", description: "Add immediate value to AX", microops: ["Fetch Instruction", "Fetch Immediate", "Decode Operation", "ALU Addition", "Update Flags", "Store Result"] },
+  { name: "SUB R1, R2", description: "Subtract R2 from R1", microops: ["Fetch Instruction", "Decode Operands", "Setup ALU", "ALU Subtraction", "Update Flags", "Store Result"] },
+  { name: "CMP R1, R2", description: "Compare R1 with R2", microops: ["Fetch Instruction", "Decode Compare", "ALU Compare", "Update Flags Only"] },
+  { name: "JMP 2000H", description: "Jump to address 2000H", microops: ["Fetch Instruction", "Fetch Address", "Decode Jump", "Update PC"] },
+  { name: "JZ 3000H", description: "Jump if zero flag is set", microops: ["Fetch Instruction", "Fetch Address", "Check Zero Flag", "Conditional Jump"] }
 ];
 
 export const InstructionEditor = ({ onInstructionSelect, selectedInstruction }: InstructionEditorProps) => {
@@ -40,20 +43,20 @@ export const InstructionEditor = ({ onInstructionSelect, selectedInstruction }: 
       {/* Quick Select */}
       <div>
         <h4 className="text-sm font-bold text-secondary mb-2 font-mono">Sample Instructions</h4>
-        <div className="grid grid-cols-1 gap-2">
+        <div className="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto pr-1">
           {SAMPLE_INSTRUCTIONS.map((instr, index) => (
             <Button
               key={index}
               variant={selectedInstruction === instr.name ? "secondary" : "outline"}
               className={cn(
-                "justify-start h-auto p-3 font-mono text-xs",
+                "justify-start h-auto p-2 lg:p-3 font-mono text-xs",
                 selectedInstruction === instr.name && "animate-control-pulse"
               )}
               onClick={() => handleSampleSelect(instr.name)}
             >
               <div className="text-left">
-                <div className="font-bold text-primary">{instr.name}</div>
-                <div className="text-muted-foreground text-xs">{instr.description}</div>
+                <div className="font-bold text-primary text-xs lg:text-sm">{instr.name}</div>
+                <div className="text-muted-foreground text-xs hidden sm:block">{instr.description}</div>
               </div>
             </Button>
           ))}
