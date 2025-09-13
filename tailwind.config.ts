@@ -57,6 +57,27 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // CPU Simulator Colors
+        cpu: {
+          register: "hsl(var(--cpu-register))",
+          bus: "hsl(var(--cpu-bus))",
+          control: "hsl(var(--cpu-control))",
+          memory: "hsl(var(--cpu-memory))",
+          alu: "hsl(var(--cpu-alu))",
+        },
+        signal: {
+          active: "hsl(var(--signal-active))",
+          inactive: "hsl(var(--signal-inactive))",
+        },
+        phase: {
+          fetch: "hsl(var(--phase-fetch))",
+          decode: "hsl(var(--phase-decode))",
+          execute: "hsl(var(--phase-execute))",
+          writeback: "hsl(var(--phase-writeback))",
+        },
+      },
+      fontFamily: {
+        mono: ['JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', 'monospace'],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -80,10 +101,46 @@ export default {
             height: "0",
           },
         },
+        // CPU Simulator Animations
+        "signal-flow": {
+          "0%": { opacity: "0.3", transform: "scale(1)" },
+          "50%": { opacity: "1", transform: "scale(1.1)" },
+          "100%": { opacity: "0.3", transform: "scale(1)" },
+        },
+        "data-transfer": {
+          "0%": { transform: "translateX(-100%)", opacity: "0" },
+          "50%": { opacity: "1" },
+          "100%": { transform: "translateX(100%)", opacity: "0" },
+        },
+        "register-update": {
+          "0%": { backgroundColor: "hsl(var(--cpu-register))" },
+          "50%": { backgroundColor: "hsl(var(--secondary))" },
+          "100%": { backgroundColor: "hsl(var(--cpu-register))" },
+        },
+        "control-pulse": {
+          "0%": { boxShadow: "0 0 0 0 hsl(var(--cpu-control) / 0.7)" },
+          "70%": { boxShadow: "0 0 0 10px hsl(var(--cpu-control) / 0)" },
+          "100%": { boxShadow: "0 0 0 0 hsl(var(--cpu-control) / 0)" },
+        },
+        "phase-progress": {
+          "0%": { transform: "scaleX(0)" },
+          "100%": { transform: "scaleX(1)" },
+        },
+        "terminal-blink": {
+          "0%, 50%": { opacity: "1" },
+          "51%, 100%": { opacity: "0.3" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        // CPU Simulator Animations
+        "signal-flow": "signal-flow 1s ease-in-out infinite",
+        "data-transfer": "data-transfer 2s ease-in-out",
+        "register-update": "register-update 0.5s ease-in-out",
+        "control-pulse": "control-pulse 1s ease-out infinite",
+        "phase-progress": "phase-progress 1s ease-out forwards",
+        "terminal-blink": "terminal-blink 1s ease-in-out infinite",
       },
     },
   },
