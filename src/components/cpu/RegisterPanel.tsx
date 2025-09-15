@@ -4,8 +4,9 @@ import { cn } from "@/lib/utils";
 interface RegisterPanelProps {
   currentPhase: "idle" | "fetch" | "decode" | "execute" | "writeback";
   isExecuting: boolean;
-  r1Value: number;
-  r2Value: number;
+  axValue: number;
+  bxValue: number;
+  flags: { carry: boolean; zero: boolean; sign: boolean };
 }
 
 interface RegisterValues {
@@ -25,22 +26,27 @@ interface RegisterValues {
   FLAGS: number;
 }
 
-export const RegisterPanel = ({ currentPhase, isExecuting, r1Value, r2Value }: RegisterPanelProps) => {
+export const RegisterPanel = ({ currentPhase, isExecuting, axValue, bxValue, flags }: RegisterPanelProps) => {
   const [registers, setRegisters] = useState<RegisterValues>({
-    AX: r1Value, BX: r2Value, CX: 0x0000, DX: 0x0000,
+    AX: axValue, BX: bxValue, CX: 0x0000, DX: 0x0000,
     SI: 0x0000, DI: 0x0000, SP: 0xFFFF, BP: 0x0000,
     CS: 0x1000, DS: 0x1000, ES: 0x1000, SS: 0x1000,
     IP: 0x0100, FLAGS: 0x0000
   });
 
-  // Update R1 and R2 values (using AX for R1, BX for R2)
+  // Update AX and BX values based on flags
   useEffect(() => {
+    const flagsValue = (flags.carry ? 0x0001 : 0) | 
+                      (flags.zero ? 0x0040 : 0) | 
+                      (flags.sign ? 0x0080 : 0);
+    
     setRegisters(prev => ({
       ...prev,
-      AX: r1Value,
-      BX: r2Value
+      AX: axValue,
+      BX: bxValue,
+      FLAGS: flagsValue
     }));
-  }, [r1Value, r2Value]);
+  }, [axValue, bxValue, flags]);
 
   const [changedRegisters, setChangedRegisters] = useState<Set<string>>(new Set());
 
@@ -106,8 +112,8 @@ export const RegisterPanel = ({ currentPhase, isExecuting, r1Value, r2Value }: R
       <div className="border border-border rounded-lg p-3 bg-card/30">
         <h4 className="text-sm font-bold text-cpu-register mb-2 font-mono">General Purpose</h4>
         <div className="space-y-1">
-          <RegisterRow name="R1 (AX)" value={registers.AX} category="general" />
-          <RegisterRow name="R2 (BX)" value={registers.BX} category="general" />
+          <RegisterRow name="AX" value={registers.AX} category="general" />
+          <RegisterRow name="BX" value={registers.BX} category="general" />
           <RegisterRow name="CX" value={registers.CX} category="general" />
           <RegisterRow name="DX" value={registers.DX} category="general" />
         </div>
@@ -144,22 +150,34 @@ export const RegisterPanel = ({ currentPhase, isExecuting, r1Value, r2Value }: R
         </div>
       </div>
 
-      {/* Flag Details */}
+      {/* Status Flags */}
       <div className="border border-border rounded-lg p-3 bg-card/30">
         <h4 className="text-sm font-bold text-accent mb-2 font-mono">Status Flags</h4>
-        <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-          <div className={cn("flex justify-between", (registers.FLAGS & 0x0001) && "text-secondary")}>
-            <span>CF:</span><span>{(registers.FLAGS & 0x0001) ? '1' : '0'}</span>
+        <div className="grid grid-cols-3 gap-2 text-sm font-mono">
+          <div className={cn(
+            "flex justify-between p-2 rounded border transition-all duration-300",
+            flags.carry ? "border-red-500 bg-red-500/10 text-red-500" : "border-border bg-card/20 text-muted-foreground"
+          )}>
+            <span className="font-bold">C:</span>
+            <span>{flags.carry ? '1' : '0'}</span>
           </div>
-          <div className={cn("flex justify-between", (registers.FLAGS & 0x0004) && "text-secondary")}>
-            <span>PF:</span><span>{(registers.FLAGS & 0x0004) ? '1' : '0'}</span>
+          <div className={cn(
+            "flex justify-between p-2 rounded border transition-all duration-300",
+            flags.zero ? "border-blue-500 bg-blue-500/10 text-blue-500" : "border-border bg-card/20 text-muted-foreground"
+          )}>
+            <span className="font-bold">Z:</span>
+            <span>{flags.zero ? '1' : '0'}</span>
           </div>
-          <div className={cn("flex justify-between", (registers.FLAGS & 0x0040) && "text-secondary")}>
-            <span>ZF:</span><span>{(registers.FLAGS & 0x0040) ? '1' : '0'}</span>
+          <div className={cn(
+            "flex justify-between p-2 rounded border transition-all duration-300",
+            flags.sign ? "border-yellow-500 bg-yellow-500/10 text-yellow-500" : "border-border bg-card/20 text-muted-foreground"
+          )}>
+            <span className="font-bold">S:</span>
+            <span>{flags.sign ? '1' : '0'}</span>
           </div>
-          <div className={cn("flex justify-between", (registers.FLAGS & 0x0080) && "text-secondary")}>
-            <span>SF:</span><span>{(registers.FLAGS & 0x0080) ? '1' : '0'}</span>
-          </div>
+        </div>
+        <div className="text-xs text-muted-foreground font-mono mt-2">
+          Comparison Result: AX({axValue}) - BX({bxValue}) = {axValue - bxValue}
         </div>
       </div>
     </div>

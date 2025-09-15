@@ -8,23 +8,23 @@ import { cn } from "@/lib/utils";
 interface InstructionEditorProps {
   onInstructionSelect: (instruction: string) => void;
   selectedInstruction: string;
-  r1Value: number;
-  r2Value: number;
-  onR1Change: (value: number) => void;
-  onR2Change: (value: number) => void;
+  axValue: number;
+  bxValue: number;
+  onAxChange: (value: number) => void;
+  onBxChange: (value: number) => void;
 }
 
 const SAMPLE_INSTRUCTIONS = [
-  { name: "CMP R1, R2", description: "Compare R1 with R2 (Single Bus Organization)", microops: ["PCout, MARin, Read, Select4, Add, Zin", "Zout, PCin, Yin, WMFC", "MDRout, IRin", "R1out, Yin", "R2out, SelectY, Sub, Zin, End"] }
+  { name: "CMP AX, BX", description: "Compare AX with BX (Single Bus Organization)", microops: ["IAC: PC → MAR", "IF: Memory → MDR → IR", "IOD: Decode CMP", "OAC: AX → Bus", "OF: BX → ALU", "DO: Set Flags C,Z,S"] }
 ];
 
 export const InstructionEditor = ({ 
   onInstructionSelect, 
   selectedInstruction, 
-  r1Value, 
-  r2Value, 
-  onR1Change, 
-  onR2Change 
+  axValue, 
+  bxValue, 
+  onAxChange, 
+  onBxChange 
 }: InstructionEditorProps) => {
   const handleSampleSelect = (instruction: string) => {
     onInstructionSelect(instruction);
@@ -55,12 +55,12 @@ export const InstructionEditor = ({
         <h4 className="text-sm font-bold text-cpu-register mb-2 font-mono">Register Values</h4>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="r1-value" className="text-sm font-medium font-mono">R1 Value</Label>
+            <Label htmlFor="ax-value" className="text-sm font-medium font-mono">AX Value</Label>
             <Input
-              id="r1-value"
+              id="ax-value"
               type="number"
-              value={r1Value}
-              onChange={(e) => onR1Change(parseInt(e.target.value) || 0)}
+              value={axValue}
+              onChange={(e) => onAxChange(parseInt(e.target.value) || 0)}
               className="font-mono text-sm"
               min="0"
               max="65535"
@@ -68,12 +68,12 @@ export const InstructionEditor = ({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="r2-value" className="text-sm font-medium font-mono">R2 Value</Label>
+            <Label htmlFor="bx-value" className="text-sm font-medium font-mono">BX Value</Label>
             <Input
-              id="r2-value"
+              id="bx-value"
               type="number"
-              value={r2Value}
-              onChange={(e) => onR2Change(parseInt(e.target.value) || 0)}
+              value={bxValue}
+              onChange={(e) => onBxChange(parseInt(e.target.value) || 0)}
               className="font-mono text-sm"
               min="0"
               max="65535"
@@ -82,7 +82,7 @@ export const InstructionEditor = ({
           </div>
         </div>
         <div className="text-xs text-muted-foreground font-mono">
-          Current comparison: R1({r1Value}) vs R2({r2Value})
+          Current comparison: AX({axValue}) vs BX({bxValue})
         </div>
       </div>
 
@@ -98,7 +98,7 @@ export const InstructionEditor = ({
             
             <div className="space-y-2">
               <div className="text-xs text-muted-foreground font-mono">
-                Single Bus Organization - Compare R1 with R2
+                Single Bus Organization - Compare AX with BX
               </div>
               <div>
                 <div className="text-xs font-bold text-cpu-control font-mono mb-1">Control Signal Steps:</div>

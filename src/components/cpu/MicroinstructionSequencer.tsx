@@ -12,6 +12,10 @@ interface MicroinstructionSequencerProps {
   onExecutionStart: () => void;
   onExecutionStop: () => void;
   onRunWithoutAnimation: () => void;
+  axValue: number;
+  bxValue: number;
+  flags: { carry: boolean; zero: boolean; sign: boolean };
+  onFlagsUpdate: (flags: { carry: boolean; zero: boolean; sign: boolean }) => void;
 }
 
 interface Microinstruction {
@@ -23,40 +27,47 @@ interface Microinstruction {
 }
 
 const MICROINSTRUCTIONS_MAP: Record<string, Microinstruction[]> = {
-  "CMP R1, R2": [
+  "CMP AX, BX": [
     {
       id: 1,
-      name: "Fetch Instruction Address",
+      name: "Instruction Address Calculation (IAC)",
       phase: "fetch",
-      controlSignals: ["PCout", "MARin", "Read", "Select4", "Add", "Zin"],
+      controlSignals: ["PC", "MAR", "Memory Read"],
       duration: 1000
     },
     {
       id: 2,
-      name: "Update Program Counter", 
+      name: "Instruction Fetch (IF)", 
       phase: "fetch",
-      controlSignals: ["Zout", "PCin", "Yin", "WMFC"],
+      controlSignals: ["Memory", "MDR", "IR", "PC+1"],
       duration: 1000
     },
     {
       id: 3,
-      name: "Load Instruction",
+      name: "Instruction Operation Decoding (IOD)",
       phase: "decode",
-      controlSignals: ["MDRout", "IRin"],
+      controlSignals: ["IR", "Control Unit", "Decode"],
       duration: 1000
     },
     {
       id: 4,
-      name: "Read R1 to ALU",
+      name: "Operand Address Calculation (OAC) - AX",
       phase: "execute",
-      controlSignals: ["R1out", "Yin"],
+      controlSignals: ["AX", "Internal Bus"],
       duration: 1000
     },
     {
       id: 5,
-      name: "Compare R1 with R2",
+      name: "Operand Fetch (OF) - BX",
       phase: "execute", 
-      controlSignals: ["R2out", "SelectY", "Sub", "Zin", "End"],
+      controlSignals: ["BX", "ALU", "Compare Operation"],
+      duration: 1000
+    },
+    {
+      id: 6,
+      name: "Data Operation (DO) - Set Flags",
+      phase: "writeback", 
+      controlSignals: ["ALU Result", "Status Flags", "C", "Z", "S"],
       duration: 1000
     }
   ]
@@ -68,7 +79,11 @@ export const MicroinstructionSequencer = ({
   isExecuting, 
   onExecutionStart, 
   onExecutionStop,
-  onRunWithoutAnimation
+  onRunWithoutAnimation,
+  axValue,
+  bxValue,
+  flags,
+  onFlagsUpdate
 }: MicroinstructionSequencerProps) => {
   const [currentMicroinstruction, setCurrentMicroinstruction] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -96,7 +111,14 @@ export const MicroinstructionSequencer = ({
               setCurrentMicroinstruction(prev => prev + 1);
               setProgress(0);
             } else {
-              // Execution complete
+              // Execution complete - calculate and set flags
+              const result = axValue - bxValue;
+              const newFlags = {
+                carry: axValue < bxValue,
+                zero: result === 0,
+                sign: result < 0
+              };
+              onFlagsUpdate(newFlags);
               onExecutionStop();
               setCurrentMicroinstruction(0);
               setProgress(0);
@@ -111,7 +133,7 @@ export const MicroinstructionSequencer = ({
         };
       }
     }
-  }, [isExecuting, stepMode, currentMicroinstruction, microinstructions, onExecutionStop]);
+  }, [isExecuting, stepMode, currentMicroinstruction, microinstructions, onExecutionStop, axValue, bxValue, onFlagsUpdate]);
 
   const handleStart = () => {
     if (microinstructions.length > 0) {
@@ -246,6 +268,17 @@ export const MicroinstructionSequencer = ({
                   {signal}
                 </span>
               ))}
+            </div>
+          </div>
+
+          {/* Show current register values and flags */}
+          <div className="mt-3 pt-3 border-t border-border">
+            <div className="text-xs font-bold text-muted-foreground font-mono mb-1">Current State:</div>
+            <div className="text-xs font-mono text-muted-foreground">
+              AX: {axValue.toString(16).toUpperCase().padStart(4, '0')}h | BX: {bxValue.toString(16).toUpperCase().padStart(4, '0')}h
+            </div>
+            <div className="text-xs font-mono text-muted-foreground">
+              Flags: C={flags.carry ? 1 : 0} Z={flags.zero ? 1 : 0} S={flags.sign ? 1 : 0}
             </div>
           </div>
         </Card>
