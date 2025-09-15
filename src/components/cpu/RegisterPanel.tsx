@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 interface RegisterPanelProps {
   currentPhase: "idle" | "fetch" | "decode" | "execute" | "writeback";
   isExecuting: boolean;
+  r1Value: number;
+  r2Value: number;
 }
 
 interface RegisterValues {
@@ -23,13 +25,22 @@ interface RegisterValues {
   FLAGS: number;
 }
 
-export const RegisterPanel = ({ currentPhase, isExecuting }: RegisterPanelProps) => {
+export const RegisterPanel = ({ currentPhase, isExecuting, r1Value, r2Value }: RegisterPanelProps) => {
   const [registers, setRegisters] = useState<RegisterValues>({
-    AX: 0x0000, BX: 0x0000, CX: 0x0000, DX: 0x0000,
+    AX: r1Value, BX: r2Value, CX: 0x0000, DX: 0x0000,
     SI: 0x0000, DI: 0x0000, SP: 0xFFFF, BP: 0x0000,
     CS: 0x1000, DS: 0x1000, ES: 0x1000, SS: 0x1000,
     IP: 0x0100, FLAGS: 0x0000
   });
+
+  // Update R1 and R2 values (using AX for R1, BX for R2)
+  useEffect(() => {
+    setRegisters(prev => ({
+      ...prev,
+      AX: r1Value,
+      BX: r2Value
+    }));
+  }, [r1Value, r2Value]);
 
   const [changedRegisters, setChangedRegisters] = useState<Set<string>>(new Set());
 
@@ -95,8 +106,8 @@ export const RegisterPanel = ({ currentPhase, isExecuting }: RegisterPanelProps)
       <div className="border border-border rounded-lg p-3 bg-card/30">
         <h4 className="text-sm font-bold text-cpu-register mb-2 font-mono">General Purpose</h4>
         <div className="space-y-1">
-          <RegisterRow name="AX" value={registers.AX} category="general" />
-          <RegisterRow name="BX" value={registers.BX} category="general" />
+          <RegisterRow name="R1 (AX)" value={registers.AX} category="general" />
+          <RegisterRow name="R2 (BX)" value={registers.BX} category="general" />
           <RegisterRow name="CX" value={registers.CX} category="general" />
           <RegisterRow name="DX" value={registers.DX} category="general" />
         </div>

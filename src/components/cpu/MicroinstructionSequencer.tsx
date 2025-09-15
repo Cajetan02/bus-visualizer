@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
-import { Play, Pause, Square, SkipForward } from "lucide-react";
+import { Play, Pause, Square, SkipForward, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MicroinstructionSequencerProps {
@@ -11,79 +11,54 @@ interface MicroinstructionSequencerProps {
   isExecuting: boolean;
   onExecutionStart: () => void;
   onExecutionStop: () => void;
+  onRunWithoutAnimation: () => void;
 }
 
 interface Microinstruction {
   id: number;
   name: string;
   phase: "fetch" | "decode" | "execute" | "writeback";
-  signals: string[];
+  controlSignals: string[];
   duration: number;
 }
 
 const MICROINSTRUCTIONS_MAP: Record<string, Microinstruction[]> = {
-  "MOV AX, BX": [
-    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
-    { id: 2, name: "Decode Operands", phase: "decode", signals: ["IR→CU", "CU→RegSelect"], duration: 800 },
-    { id: 3, name: "Read Source", phase: "execute", signals: ["BX→TempReg"], duration: 600 },
-    { id: 4, name: "Write Destination", phase: "writeback", signals: ["TempReg→AX"], duration: 600 },
-  ],
-  "MOV R1, (R2)": [
-    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
-    { id: 2, name: "Decode Addressing", phase: "decode", signals: ["IR→CU", "CU→RegSelect"], duration: 800 },
-    { id: 3, name: "Read Address", phase: "execute", signals: ["R2→MAR"], duration: 600 },
-    { id: 4, name: "Memory Access", phase: "execute", signals: ["MEM→MDR"], duration: 800 },
-    { id: 5, name: "Store Data", phase: "writeback", signals: ["MDR→R1"], duration: 600 },
-  ],
-  "MOV (R1), R2": [
-    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
-    { id: 2, name: "Decode Addressing", phase: "decode", signals: ["IR→CU", "CU→RegSelect"], duration: 800 },
-    { id: 3, name: "Setup Address", phase: "execute", signals: ["R1→MAR"], duration: 600 },
-    { id: 4, name: "Setup Data", phase: "execute", signals: ["R2→MDR"], duration: 600 },
-    { id: 5, name: "Memory Write", phase: "writeback", signals: ["MDR→MEM"], duration: 800 },
-  ],
-  "ADD R1, (R2)": [
-    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
-    { id: 2, name: "Decode Operation", phase: "decode", signals: ["IR→CU", "CU→RegSelect"], duration: 800 },
-    { id: 3, name: "Read Memory Address", phase: "execute", signals: ["R2→MAR"], duration: 600 },
-    { id: 4, name: "Fetch Operand", phase: "execute", signals: ["MEM→MDR", "MDR→Y"], duration: 800 },
-    { id: 5, name: "ALU Addition", phase: "execute", signals: ["R1→ALU_A", "Y→ALU_B", "ALU_ADD"], duration: 1000 },
-    { id: 6, name: "Update Flags", phase: "execute", signals: ["ALU_FLAGS→FLAGS"], duration: 400 },
-    { id: 7, name: "Store Result", phase: "writeback", signals: ["ALU→R1"], duration: 600 },
-  ],
-  "ADD AX, 1000H": [
-    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
-    { id: 2, name: "Fetch Immediate", phase: "fetch", signals: ["PC+1→MAR", "MEM→MDR"], duration: 1000 },
-    { id: 3, name: "Decode Operation", phase: "decode", signals: ["IR→CU", "MDR→Y"], duration: 800 },
-    { id: 4, name: "ALU Addition", phase: "execute", signals: ["AX→ALU_A", "Y→ALU_B", "ALU_ADD"], duration: 1200 },
-    { id: 5, name: "Update Flags", phase: "execute", signals: ["ALU_FLAGS→FLAGS"], duration: 400 },
-    { id: 6, name: "Store Result", phase: "writeback", signals: ["ALU→AX"], duration: 600 },
-  ],
-  "SUB R1, R2": [
-    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
-    { id: 2, name: "Decode Operands", phase: "decode", signals: ["IR→CU", "CU→RegSelect"], duration: 800 },
-    { id: 3, name: "Setup ALU", phase: "execute", signals: ["R1→ALU_A", "R2→ALU_B"], duration: 600 },
-    { id: 4, name: "ALU Subtraction", phase: "execute", signals: ["ALU_SUB", "ALU→Z"], duration: 1000 },
-    { id: 5, name: "Update Flags", phase: "execute", signals: ["ALU_FLAGS→FLAGS"], duration: 400 },
-    { id: 6, name: "Store Result", phase: "writeback", signals: ["Z→R1"], duration: 600 },
-  ],
   "CMP R1, R2": [
-    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
-    { id: 2, name: "Decode Compare", phase: "decode", signals: ["IR→CU", "CU→RegSelect"], duration: 800 },
-    { id: 3, name: "ALU Compare", phase: "execute", signals: ["R1→ALU_A", "R2→ALU_B", "ALU_SUB"], duration: 1000 },
-    { id: 4, name: "Update Flags Only", phase: "execute", signals: ["ALU_FLAGS→FLAGS"], duration: 600 },
-  ],
-  "JMP 2000H": [
-    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
-    { id: 2, name: "Fetch Address", phase: "fetch", signals: ["PC+1→MAR", "MEM→MDR"], duration: 1000 },
-    { id: 3, name: "Decode Jump", phase: "decode", signals: ["IR→CU", "MDR→TEMP"], duration: 800 },
-    { id: 4, name: "Update PC", phase: "execute", signals: ["TEMP→PC"], duration: 600 },
-  ],
-  "JZ 3000H": [
-    { id: 1, name: "Fetch Instruction", phase: "fetch", signals: ["PC→MAR", "MEM→MDR", "MDR→IR"], duration: 1000 },
-    { id: 2, name: "Fetch Address", phase: "fetch", signals: ["PC+1→MAR", "MEM→MDR"], duration: 1000 },
-    { id: 3, name: "Check Zero Flag", phase: "decode", signals: ["IR→CU", "FLAGS→CU"], duration: 800 },
-    { id: 4, name: "Conditional Jump", phase: "execute", signals: ["MDR→TEMP", "TEMP→PC"], duration: 600 },
+    {
+      id: 1,
+      name: "Fetch Instruction Address",
+      phase: "fetch",
+      controlSignals: ["PCout", "MARin", "Read", "Select4", "Add", "Zin"],
+      duration: 1000
+    },
+    {
+      id: 2,
+      name: "Update Program Counter", 
+      phase: "fetch",
+      controlSignals: ["Zout", "PCin", "Yin", "WMFC"],
+      duration: 1000
+    },
+    {
+      id: 3,
+      name: "Load Instruction",
+      phase: "decode",
+      controlSignals: ["MDRout", "IRin"],
+      duration: 1000
+    },
+    {
+      id: 4,
+      name: "Read R1 to ALU",
+      phase: "execute",
+      controlSignals: ["R1out", "Yin"],
+      duration: 1000
+    },
+    {
+      id: 5,
+      name: "Compare R1 with R2",
+      phase: "execute", 
+      controlSignals: ["R2out", "SelectY", "Sub", "Zin", "End"],
+      duration: 1000
+    }
   ]
 };
 
@@ -92,7 +67,8 @@ export const MicroinstructionSequencer = ({
   currentPhase, 
   isExecuting, 
   onExecutionStart, 
-  onExecutionStop 
+  onExecutionStop,
+  onRunWithoutAnimation
 }: MicroinstructionSequencerProps) => {
   const [currentMicroinstruction, setCurrentMicroinstruction] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -203,6 +179,17 @@ export const MicroinstructionSequencer = ({
         </Button>
         
         <Button
+          onClick={onRunWithoutAnimation}
+          disabled={isExecuting}
+          variant="secondary"
+          size="sm"
+          className="font-mono"
+        >
+          <Zap className="w-4 h-4 mr-1" />
+          Run Instant
+        </Button>
+        
+        <Button
           onClick={handleStop}
           disabled={!isExecuting}
           variant="destructive"
@@ -248,7 +235,7 @@ export const MicroinstructionSequencer = ({
           <div className="space-y-1">
             <div className="text-xs font-bold text-muted-foreground font-mono">Control Signals:</div>
             <div className="flex flex-wrap gap-1">
-              {currentMicro.signals.map((signal, idx) => (
+              {currentMicro.controlSignals.map((signal, idx) => (
                 <span
                   key={idx}
                   className={cn(
@@ -293,7 +280,7 @@ export const MicroinstructionSequencer = ({
               <div className="flex-1">
                 <div className="text-sm font-bold">{micro.name}</div>
                 <div className="text-xs text-muted-foreground">
-                  {micro.signals.join(" → ")}
+                  {micro.controlSignals.join(" → ")}
                 </div>
               </div>
             </div>

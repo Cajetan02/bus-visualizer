@@ -11,7 +11,29 @@ import { Card } from "@/components/ui/card";
 const Index = () => {
   const [isExecuting, setIsExecuting] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<"idle" | "fetch" | "decode" | "execute" | "writeback">("idle");
-  const [selectedInstruction, setSelectedInstruction] = useState<string>("");
+  const [selectedInstruction, setSelectedInstruction] = useState<string>("CMP R1, R2");
+  const [r1Value, setR1Value] = useState(10);
+  const [r2Value, setR2Value] = useState(20);
+
+  const handleStartExecution = () => {
+    setIsExecuting(true);
+    setCurrentPhase("fetch");
+  };
+
+  const handleStopExecution = () => {
+    setIsExecuting(false);
+    setCurrentPhase("idle");
+  };
+
+  const handleRunWithoutAnimation = () => {
+    if (selectedInstruction) {
+      // Instantly complete the instruction and show comparison result
+      setCurrentPhase("execute");
+      const compareResult = r1Value - r2Value;
+      console.log(`CMP R1(${r1Value}), R2(${r2Value}) = ${compareResult}`);
+      setTimeout(() => setCurrentPhase("idle"), 100);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-card p-4">
@@ -58,8 +80,9 @@ const Index = () => {
               instruction={selectedInstruction}
               currentPhase={currentPhase}
               isExecuting={isExecuting}
-              onExecutionStart={() => setIsExecuting(true)}
-              onExecutionStop={() => setIsExecuting(false)}
+              onExecutionStart={handleStartExecution}
+              onExecutionStop={handleStopExecution}
+              onRunWithoutAnimation={handleRunWithoutAnimation}
             />
           </Card>
         </div>
@@ -68,7 +91,12 @@ const Index = () => {
         <div className="space-y-4 lg:space-y-6">
           <Card className="p-4 lg:p-6 border-border bg-card/50 backdrop-blur">
             <h2 className="text-base lg:text-lg font-bold font-mono text-cpu-register mb-4">CPU Registers</h2>
-            <RegisterPanel currentPhase={currentPhase} isExecuting={isExecuting} />
+            <RegisterPanel 
+              currentPhase={currentPhase} 
+              isExecuting={isExecuting}
+              r1Value={r1Value}
+              r2Value={r2Value}
+            />
           </Card>
 
           <Card className="p-4 lg:p-6 border-border bg-card/50 backdrop-blur">
@@ -78,9 +106,13 @@ const Index = () => {
 
           <Card className="p-4 lg:p-6 border-border bg-card/50 backdrop-blur">
             <h2 className="text-base lg:text-lg font-bold font-mono text-secondary mb-4">Instruction Editor</h2>
-            <InstructionEditor 
+            <InstructionEditor
               onInstructionSelect={setSelectedInstruction}
               selectedInstruction={selectedInstruction}
+              r1Value={r1Value}
+              r2Value={r2Value}
+              onR1Change={setR1Value}
+              onR2Change={setR2Value}
             />
           </Card>
         </div>
