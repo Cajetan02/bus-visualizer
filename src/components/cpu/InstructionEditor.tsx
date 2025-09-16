@@ -1,66 +1,41 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 
 interface InstructionEditorProps {
-  onInstructionSelect: (instruction: string) => void;
-  selectedInstruction: string;
-  r1Value: number;
-  r2Value: number;
-  onR1Change: (value: number) => void;
-  onR2Change: (value: number) => void;
+  axValue: number;
+  bxValue: number;
+  onAxChange: (value: number) => void;
+  onBxChange: (value: number) => void;
 }
 
-const SAMPLE_INSTRUCTIONS = [
-  { name: "CMP R1, R2", description: "Compare R1 with R2 (Single Bus Organization)", microops: ["PCout, MARin, Read, Select4, Add, Zin", "Zout, PCin, Yin, WMFC", "MDRout, IRin", "R1out, Yin", "R2out, SelectY, Sub, Zin, End"] }
-];
-
 export const InstructionEditor = ({ 
-  onInstructionSelect, 
-  selectedInstruction, 
-  r1Value, 
-  r2Value, 
-  onR1Change, 
-  onR2Change 
+  axValue, 
+  bxValue, 
+  onAxChange, 
+  onBxChange 
 }: InstructionEditorProps) => {
-  const handleSampleSelect = (instruction: string) => {
-    onInstructionSelect(instruction);
-  };
-
   return (
     <div className="space-y-4">
-      {/* Instruction Selection */}
-      <div>
-        <h4 className="text-sm font-bold text-secondary mb-2 font-mono">Available Instruction</h4>
-        <Button
-          variant={selectedInstruction === SAMPLE_INSTRUCTIONS[0].name ? "secondary" : "outline"}
-          className={cn(
-            "justify-start h-auto p-3 font-mono text-xs w-full",
-            selectedInstruction === SAMPLE_INSTRUCTIONS[0].name && "animate-control-pulse"
-          )}
-          onClick={() => handleSampleSelect(SAMPLE_INSTRUCTIONS[0].name)}
-        >
-          <div className="text-left">
-            <div className="font-bold text-primary text-sm">{SAMPLE_INSTRUCTIONS[0].name}</div>
-            <div className="text-muted-foreground text-xs">{SAMPLE_INSTRUCTIONS[0].description}</div>
-          </div>
-        </Button>
+      {/* Instruction Display */}
+      <div className="text-center p-3 border border-border rounded-lg bg-card/30">
+        <h3 className="text-lg font-mono font-bold text-primary mb-1">CMP AX, BX</h3>
+        <p className="text-xs text-muted-foreground font-mono">
+          Compare Accumulator with Base Register
+        </p>
       </div>
 
       {/* Register Values Editor */}
       <div className="space-y-4 p-4 bg-muted/20 rounded-lg border border-border">
         <h4 className="text-sm font-bold text-cpu-register mb-2 font-mono">Register Values</h4>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="r1-value" className="text-sm font-medium font-mono">R1 Value</Label>
+            <Label htmlFor="ax-value" className="text-sm font-medium font-mono">AX (Accumulator)</Label>
             <Input
-              id="r1-value"
+              id="ax-value"
               type="number"
-              value={r1Value}
-              onChange={(e) => onR1Change(parseInt(e.target.value) || 0)}
+              value={axValue}
+              onChange={(e) => onAxChange(parseInt(e.target.value) || 0)}
               className="font-mono text-sm"
               min="0"
               max="65535"
@@ -68,12 +43,12 @@ export const InstructionEditor = ({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="r2-value" className="text-sm font-medium font-mono">R2 Value</Label>
+            <Label htmlFor="bx-value" className="text-sm font-medium font-mono">BX (Base)</Label>
             <Input
-              id="r2-value"
+              id="bx-value"
               type="number"
-              value={r2Value}
-              onChange={(e) => onR2Change(parseInt(e.target.value) || 0)}
+              value={bxValue}
+              onChange={(e) => onBxChange(parseInt(e.target.value) || 0)}
               className="font-mono text-sm"
               min="0"
               max="65535"
@@ -81,40 +56,49 @@ export const InstructionEditor = ({
             />
           </div>
         </div>
-        <div className="text-xs text-muted-foreground font-mono">
-          Current comparison: R1({r1Value}) vs R2({r2Value})
+        <div className="text-xs text-muted-foreground font-mono text-center">
+          Will compare AX({axValue}) with BX({bxValue})
         </div>
       </div>
 
-      {/* Microinstruction Details */}
-      {selectedInstruction && (
-        <Card className="p-4 border-border bg-card/30">
-          <h4 className="text-sm font-bold text-cpu-control mb-2 font-mono">Microinstruction Steps</h4>
-          <div className="space-y-2">
-            <div className="font-mono text-sm">
-              <span className="text-muted-foreground">Instruction:</span>
-              <span className="text-primary ml-2">{selectedInstruction}</span>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="text-xs text-muted-foreground font-mono">
-                Single Bus Organization - Compare R1 with R2
-              </div>
-              <div>
-                <div className="text-xs font-bold text-cpu-control font-mono mb-1">Control Signal Steps:</div>
-                <div className="space-y-1">
-                  {SAMPLE_INSTRUCTIONS[0].microops.map((step, idx) => (
-                    <div key={idx} className="text-xs font-mono text-muted-foreground flex items-start">
-                      <div className="w-4 h-4 rounded-full bg-cpu-control mr-2 flex items-center justify-center text-white text-xs font-bold mt-0.5">{idx + 1}</div>
-                      <div>{step}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+      {/* Operation Details */}
+      <Card className="p-4 border-border bg-card/30">
+        <h4 className="text-sm font-bold text-cpu-control mb-2 font-mono">Operation Details</h4>
+        <div className="space-y-2 text-xs font-mono">
+          <div>
+            <span className="text-muted-foreground">Operation:</span>
+            <span className="text-primary ml-2">AX - BX (Subtraction)</span>
           </div>
-        </Card>
-      )}
+          <div>
+            <span className="text-muted-foreground">Result:</span>
+            <span className="text-secondary ml-2">{axValue - bxValue}</span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Flags affected:</span>
+            <span className="text-cpu-control ml-2">Carry, Zero, Sign</span>
+          </div>
+        </div>
+      </Card>
+
+      {/* 6-Step Process */}
+      <Card className="p-4 border-border bg-card/30">
+        <h4 className="text-sm font-bold text-cpu-memory mb-2 font-mono">6-Step Execution Process</h4>
+        <div className="space-y-1">
+          {[
+            "IAC - Instruction Address Calculation",
+            "IF - Instruction Fetch", 
+            "IOD - Instruction Operation Decoding",
+            "OAC - Operand Address Calculation",
+            "OF - Operand Fetch",
+            "DO - Data Operation"
+          ].map((step, idx) => (
+            <div key={idx} className="text-xs font-mono text-muted-foreground flex items-center">
+              <div className="w-4 h-4 rounded-full bg-cpu-control mr-2 flex items-center justify-center text-white text-xs font-bold">{idx + 1}</div>
+              <div>{step}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
     </div>
   );
 };
