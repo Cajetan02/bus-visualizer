@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 // Execution phases for this simulator
-type ExecutionPhase = "idle" | "iac" | "if" | "iod" | "oac" | "of" | "do";
+type ExecutionPhase = "idle" | "step1" | "step2" | "step3" | "step4" | "step5";
 
 interface RegisterPanelProps {
   currentPhase: ExecutionPhase;
@@ -12,7 +12,7 @@ interface RegisterPanelProps {
 }
 
 export const RegisterPanel = ({ currentPhase, isExecuting, axValue, bxValue, flags }: RegisterPanelProps) => {
-  const isRegistersActive = currentPhase === "of" || currentPhase === "do";
+  const isRegistersActive = currentPhase === "step4" || currentPhase === "step5";
 
   const formatHex = (value: number) => `0x${(value & 0xffff)
     .toString(16)

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-type ExecutionPhase = "idle" | "iac" | "if" | "iod" | "oac" | "of" | "do";
+type ExecutionPhase = "idle" | "step1" | "step2" | "step3" | "step4" | "step5";
 
 interface CPUArchitectureProps {
   currentPhase: ExecutionPhase;
@@ -24,7 +24,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
             {/* Control Unit */}
             <div className={cn(
               "w-28 h-20 p-3 rounded-lg border-2 transition-all duration-500 flex flex-col items-center justify-center relative",
-              currentPhase === "iod" ? "border-cpu-control bg-cpu-control/10 animate-control-pulse" : "border-border",
+              currentPhase === "step3" ? "border-cpu-control bg-cpu-control/10 animate-control-pulse" : "border-border",
               "bg-cpu-control/5"
             )}>
               <div className="text-xs font-mono font-bold text-cpu-control">CONTROL</div>
@@ -32,7 +32,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
               <div className="text-[10px] text-muted-foreground">CU</div>
               
               {/* Activity indicator */}
-              {isExecuting && currentPhase === "iod" && (
+              {isExecuting && currentPhase === "step3" && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-cpu-control rounded-full animate-data-pulse"></div>
               )}
             </div>
@@ -41,10 +41,10 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
             <div className="relative">
               <div className={cn(
                 "w-1 h-8 transition-all duration-500 relative",
-                currentPhase === "iod" ? "bg-cpu-control" : "bg-border"
+                currentPhase === "step3" ? "bg-cpu-control" : "bg-border"
               )}>
                 {/* Data flowing down */}
-                {isExecuting && currentPhase === "iod" && (
+                {isExecuting && currentPhase === "step3" && (
                   <>
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-cpu-control rounded-full animate-data-pulse"></div>
                     <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-cpu-control/60 rounded-full animate-data-pulse" style={{ animationDelay: '0.2s' }}></div>
@@ -59,7 +59,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
           <div className="flex flex-col items-center space-y-4">
             <div className={cn(
               "w-28 h-20 p-3 rounded-lg border-2 transition-all duration-500 flex flex-col items-center justify-center relative",
-              currentPhase === "do" ? "border-cpu-alu bg-cpu-alu/10 animate-register-update" : "border-border",
+              currentPhase === "step5" ? "border-cpu-alu bg-cpu-alu/10 animate-register-update" : "border-border",
               "bg-cpu-alu/5"
             )}>
               <div className="text-xs font-mono font-bold text-cpu-alu">ALU</div>
@@ -67,7 +67,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
               <div className="text-[10px] text-muted-foreground">Logic Unit</div>
               
               {/* Activity indicator */}
-              {isExecuting && currentPhase === "do" && (
+              {isExecuting && currentPhase === "step5" && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-cpu-alu rounded-full animate-data-pulse"></div>
               )}
             </div>
@@ -76,10 +76,10 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
             <div className="relative">
               <div className={cn(
                 "w-1 h-8 transition-all duration-500",
-                currentPhase === "do" ? "bg-cpu-alu" : "bg-border"
+                currentPhase === "step5" ? "bg-cpu-alu" : "bg-border"
               )}>
                 {/* Data flowing */}
-                {isExecuting && currentPhase === "do" && (
+                {isExecuting && currentPhase === "step5" && (
                   <>
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-cpu-alu rounded-full animate-data-pulse"></div>
                     <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-cpu-alu/60 rounded-full animate-data-pulse" style={{ animationDelay: '0.2s' }}></div>
@@ -94,7 +94,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
           <div className="flex flex-col items-center space-y-4">
             <div className={cn(
               "w-28 h-20 p-3 rounded-lg border-2 transition-all duration-500 flex flex-col items-center justify-center relative",
-              (currentPhase === "of" || currentPhase === "do") ? "border-cpu-register bg-cpu-register/10 animate-register-update" : "border-border",
+              (currentPhase === "step4" || currentPhase === "step5") ? "border-cpu-register bg-cpu-register/10 animate-register-update" : "border-border",
               "bg-cpu-register/5"
             )}>
               <div className="text-xs font-mono font-bold text-cpu-register">REGISTERS</div>
@@ -102,7 +102,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
               <div className="text-[10px] text-muted-foreground">SI DI BP SP</div>
               
               {/* Activity indicator */}
-              {isExecuting && (currentPhase === "of" || currentPhase === "do") && (
+              {isExecuting && (currentPhase === "step4" || currentPhase === "step5") && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-cpu-register rounded-full animate-data-pulse"></div>
               )}
             </div>
@@ -111,47 +111,13 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
             <div className="relative">
               <div className={cn(
                 "w-1 h-8 transition-all duration-500",
-                (currentPhase === "of" || currentPhase === "do") ? "bg-cpu-register" : "bg-border"
+                (currentPhase === "step4" || currentPhase === "step5") ? "bg-cpu-register" : "bg-border"
               )}>
                 {/* Data flowing */}
-                {isExecuting && (currentPhase === "of" || currentPhase === "do") && (
+                {isExecuting && (currentPhase === "step4" || currentPhase === "step5") && (
                   <>
                     <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-cpu-register rounded-full animate-data-pulse"></div>
                     <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-cpu-register/60 rounded-full animate-data-pulse" style={{ animationDelay: '0.2s' }}></div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Memory */}
-          <div className="flex flex-col items-center space-y-4">
-            <div className={cn(
-              "w-28 h-20 p-3 rounded-lg border-2 transition-all duration-500 flex flex-col items-center justify-center relative",
-              currentPhase === "if" ? "border-cpu-memory bg-cpu-memory/10 animate-control-pulse" : "border-border",
-              "bg-cpu-memory/5"
-            )}>
-              <div className="text-xs font-mono font-bold text-cpu-memory">MEMORY</div>
-              <div className="text-[10px] text-muted-foreground">1MB</div>
-              <div className="text-[10px] text-muted-foreground">RAM/ROM</div>
-              
-              {/* Activity indicator */}
-              {isExecuting && currentPhase === "if" && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-cpu-memory rounded-full animate-data-pulse"></div>
-              )}
-            </div>
-
-            {/* Vertical Connection to Bus */}
-            <div className="relative">
-              <div className={cn(
-                "w-1 h-8 transition-all duration-500",
-                currentPhase === "if" ? "bg-cpu-memory" : "bg-border"
-              )}>
-                {/* Data flowing both ways during fetch */}
-                {isExecuting && currentPhase === "if" && (
-                  <>
-                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-cpu-memory rounded-full animate-data-pulse"></div>
-                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-cpu-memory/60 rounded-full animate-data-pulse" style={{ animationDelay: '0.3s' }}></div>
                   </>
                 )}
               </div>
@@ -267,10 +233,10 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
             <div className="relative">
               <div className={cn(
                 "w-1 h-8 transition-all duration-500",
-                currentPhase === "iac" ? "bg-cpu-control" : "bg-border"
+                (currentPhase === "step1" || currentPhase === "step2") ? "bg-cpu-control" : "bg-border"
               )}>
                 {/* Data flowing up to bus */}
-                {isExecuting && currentPhase === "iac" && (
+                {isExecuting && (currentPhase === "step1" || currentPhase === "step2") && (
                   <>
                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-cpu-control rounded-full animate-data-pulse"></div>
                     <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-cpu-control/60 rounded-full animate-data-pulse" style={{ animationDelay: '0.2s' }}></div>
@@ -281,7 +247,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
             
             <div className={cn(
               "w-28 h-16 p-2 rounded-lg border-2 transition-all duration-500 flex flex-col items-center justify-center relative",
-              currentPhase === "iac" ? "border-cpu-control bg-cpu-control/10 animate-control-pulse" : "border-border",
+              (currentPhase === "step1" || currentPhase === "step2") ? "border-cpu-control bg-cpu-control/10 animate-control-pulse" : "border-border",
               "bg-cpu-control/5"
             )}>
               <div className="text-xs font-mono font-bold text-cpu-control">PC</div>
@@ -289,7 +255,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
               <div className="text-[10px] text-muted-foreground">Counter</div>
               
               {/* Activity indicator */}
-              {isExecuting && currentPhase === "iac" && (
+              {isExecuting && (currentPhase === "step1" || currentPhase === "step2") && (
                 <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-cpu-control rounded-full animate-data-pulse"></div>
               )}
             </div>
@@ -300,10 +266,10 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
             <div className="relative">
               <div className={cn(
                 "w-1 h-8 transition-all duration-500",
-                currentPhase === "iod" ? "bg-cpu-control" : "bg-border"
+                currentPhase === "step3" ? "bg-cpu-control" : "bg-border"
               )}>
                 {/* Data flowing down from bus */}
-                {isExecuting && currentPhase === "iod" && (
+                {isExecuting && currentPhase === "step3" && (
                   <>
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-cpu-control rounded-full animate-data-pulse"></div>
                     <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-cpu-control/60 rounded-full animate-data-pulse" style={{ animationDelay: '0.2s' }}></div>
@@ -314,7 +280,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
             
             <div className={cn(
               "w-28 h-16 p-2 rounded-lg border-2 transition-all duration-500 flex flex-col items-center justify-center relative",
-              currentPhase === "iod" ? "border-cpu-control bg-cpu-control/10 animate-control-pulse" : "border-border",
+              currentPhase === "step3" ? "border-cpu-control bg-cpu-control/10 animate-control-pulse" : "border-border",
               "bg-cpu-control/5"
             )}>
               <div className="text-xs font-mono font-bold text-cpu-control">IR</div>
@@ -322,7 +288,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
               <div className="text-[10px] text-muted-foreground">Register</div>
               
               {/* Activity indicator */}
-              {isExecuting && currentPhase === "iod" && (
+              {isExecuting && currentPhase === "step3" && (
                 <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-cpu-control rounded-full animate-data-pulse"></div>
               )}
             </div>
@@ -333,10 +299,10 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
             <div className="relative">
               <div className={cn(
                 "w-1 h-8 transition-all duration-500",
-                (currentPhase === "if") ? "bg-cpu-memory" : "bg-border"
+                (currentPhase === "step1" || currentPhase === "step3") ? "bg-cpu-memory" : "bg-border"
               )}>
                 {/* Bidirectional data flow */}
-                {isExecuting && currentPhase === "if" && (
+                {isExecuting && (currentPhase === "step1" || currentPhase === "step3") && (
                   <>
                     <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-cpu-memory rounded-full animate-data-pulse"></div>
                     <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-cpu-memory/60 rounded-full animate-data-pulse" style={{ animationDelay: '0.3s' }}></div>
@@ -347,7 +313,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
             
             <div className={cn(
               "w-28 h-16 p-2 rounded-lg border-2 transition-all duration-500 flex flex-col items-center justify-center relative",
-              (currentPhase === "if") ? "border-cpu-memory bg-cpu-memory/10 animate-control-pulse" : "border-border",
+              (currentPhase === "step1" || currentPhase === "step3") ? "border-cpu-memory bg-cpu-memory/10 animate-control-pulse" : "border-border",
               "bg-cpu-memory/5"
             )}>
               <div className="text-xs font-mono font-bold text-cpu-memory">MAR</div>
@@ -355,7 +321,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
               <div className="text-[10px] text-muted-foreground">Address</div>
               
               {/* Activity indicator */}
-              {isExecuting && currentPhase === "if" && (
+              {isExecuting && (currentPhase === "step1" || currentPhase === "step3") && (
                 <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-cpu-memory rounded-full animate-data-pulse"></div>
               )}
             </div>
@@ -366,10 +332,10 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
             <div className="relative">
               <div className={cn(
                 "w-1 h-8 transition-all duration-500",
-                (currentPhase === "if") ? "bg-cpu-memory" : "bg-border"
+                (currentPhase === "step1" || currentPhase === "step3") ? "bg-cpu-memory" : "bg-border"
               )}>
                 {/* Data flowing both directions */}
-                {isExecuting && currentPhase === "if" && (
+                {isExecuting && (currentPhase === "step1" || currentPhase === "step3") && (
                   <>
                     <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-cpu-memory rounded-full animate-data-pulse"></div>
                     <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-cpu-memory/60 rounded-full animate-data-pulse" style={{ animationDelay: '0.4s' }}></div>
@@ -380,7 +346,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
             
             <div className={cn(
               "w-28 h-16 p-2 rounded-lg border-2 transition-all duration-500 flex flex-col items-center justify-center relative",
-              (currentPhase === "if") ? "border-cpu-memory bg-cpu-memory/10 animate-control-pulse" : "border-border",
+              (currentPhase === "step1" || currentPhase === "step3") ? "border-cpu-memory bg-cpu-memory/10 animate-control-pulse" : "border-border",
               "bg-cpu-memory/5"
             )}>
               <div className="text-xs font-mono font-bold text-cpu-memory">MDR</div>
@@ -388,8 +354,31 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
               <div className="text-[10px] text-muted-foreground">Data</div>
               
               {/* Activity indicator */}
-              {isExecuting && currentPhase === "if" && (
+              {isExecuting && (currentPhase === "step1" || currentPhase === "step3") && (
                 <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-cpu-memory rounded-full animate-data-pulse"></div>
+              )}
+            </div>
+          </div>
+
+          {/* Memory - Behind MAR and MDR */}
+          <div className="flex flex-col items-center space-y-4">
+            <div className="relative">
+              <div className="w-1 h-8 bg-border" />
+            </div>
+            
+            <div className={cn(
+              "w-32 h-20 p-2 rounded-lg border-2 transition-all duration-500 flex flex-col items-center justify-center relative",
+              (currentPhase === "step1" || currentPhase === "step3") ? "border-cpu-memory bg-cpu-memory/10 animate-control-pulse" : "border-border",
+              "bg-cpu-memory/5 -mt-2"
+            )}>
+              <div className="text-xs font-mono font-bold text-cpu-memory">MEMORY</div>
+              <div className="text-[10px] text-muted-foreground">1MB RAM/ROM</div>
+              <div className="text-[10px] text-muted-foreground">Connected to</div>
+              <div className="text-[10px] text-muted-foreground">MAR & MDR</div>
+              
+              {/* Activity indicator */}
+              {isExecuting && (currentPhase === "step1" || currentPhase === "step3") && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-cpu-memory rounded-full animate-data-pulse"></div>
               )}
             </div>
           </div>
@@ -438,11 +427,10 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
               "w-3 h-3 rounded-full transition-all duration-300",
               isExecuting ? "animate-terminal-blink" : "",
               currentPhase === "idle" ? "bg-muted-foreground" :
-              currentPhase === "iac" ? "bg-cpu-control" :
-              currentPhase === "if" ? "bg-phase-fetch" :
-              currentPhase === "iod" ? "bg-cpu-control" :
-              currentPhase === "oac" ? "bg-cpu-register" :
-              currentPhase === "of" ? "bg-cpu-register" :
+              currentPhase === "step1" ? "bg-cpu-control" :
+              currentPhase === "step2" ? "bg-cpu-control" :
+              currentPhase === "step3" ? "bg-cpu-control" :
+              currentPhase === "step4" ? "bg-cpu-register" :
               "bg-cpu-alu"
             )} />
             <span className="font-mono text-sm font-bold">

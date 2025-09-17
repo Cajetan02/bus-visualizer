@@ -5,7 +5,7 @@ import { InstructionEditor } from "@/components/cpu/InstructionEditor";
 import { MicroinstructionSequencer } from "@/components/cpu/MicroinstructionSequencer";
 import { Card } from "@/components/ui/card";
 
-type ExecutionPhase = "idle" | "iac" | "if" | "iod" | "oac" | "of" | "do";
+type ExecutionPhase = "idle" | "step1" | "step2" | "step3" | "step4" | "step5";
 
 const Index = () => {
   const [isExecuting, setIsExecuting] = useState(false);
@@ -16,7 +16,7 @@ const Index = () => {
 
   const handleStartExecution = () => {
     setIsExecuting(true);
-    setCurrentPhase("iac");
+    setCurrentPhase("step1");
   };
 
   const handleStopExecution = () => {
@@ -42,7 +42,7 @@ const Index = () => {
           Intel 8086 CMP AX,BX Simulator
         </h1>
         <p className="text-sm lg:text-base text-muted-foreground font-mono">
-          Single Bus Architecture • 6-Step Microinstruction Execution
+          Single Bus Architecture • 5-Step Microinstruction Execution
         </p>
       </header>
 

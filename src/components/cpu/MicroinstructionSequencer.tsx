@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Play, Square, SkipForward, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type ExecutionPhase = "idle" | "iac" | "if" | "iod" | "oac" | "of" | "do";
+type ExecutionPhase = "idle" | "step1" | "step2" | "step3" | "step4" | "step5";
 
 interface MicroinstructionSequencerProps {
   currentPhase: ExecutionPhase;
@@ -30,44 +30,37 @@ interface Microinstruction {
 const MICROINSTRUCTIONS: Microinstruction[] = [
   {
     id: 1,
-    name: "IAC",
-    phase: "iac",
-    description: "Instruction Address Calculation - Calculate next instruction address",
+    name: "Step 1",
+    phase: "step1",
+    description: "PC_out, MAR_in, Read, Select4, Add, Z_in - PC to MAR and increment PC by 4",
     duration: 1000
   },
   {
     id: 2,
-    name: "IF",
-    phase: "if",
-    description: "Instruction Fetch - Fetch instruction from memory",
+    name: "Step 2", 
+    phase: "step2",
+    description: "Z_out, PC_in, Y_in, WMFC - Put incremented value back to PC",
     duration: 1000
   },
   {
     id: 3,
-    name: "IOD",
-    phase: "iod",
-    description: "Instruction Operation Decoding - Decode the CMP instruction",
+    name: "Step 3",
+    phase: "step3",
+    description: "MDR_out, IR_in - Move instruction from memory to IR for decoding",
     duration: 1000
   },
   {
     id: 4,
-    name: "OAC",
-    phase: "oac",
-    description: "Operand Address Calculation - Calculate operand addresses",
+    name: "Step 4", 
+    phase: "step4",
+    description: "R1_out, Y_in - Move AX register data to ALU Y input",
     duration: 1000
   },
   {
     id: 5,
-    name: "OF",
-    phase: "of",
-    description: "Operand Fetch - Fetch AX and BX register values",
-    duration: 1000
-  },
-  {
-    id: 6,
-    name: "DO",
-    phase: "do",
-    description: "Data Operation - Perform comparison and set flags",
+    name: "Step 5",
+    phase: "step5", 
+    description: "R2_out, SelectY, Sub, Z_in, End - Subtract BX from AX and set flags",
     duration: 1000
   }
 ];
@@ -224,7 +217,7 @@ export const MicroinstructionSequencer = ({
         )}>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 gap-2">
             <h4 className="font-mono text-lg font-bold text-primary">
-              {currentMicro.name} - Step {currentMicroIndex + 1}/6
+              {currentMicro.name} - {currentMicroIndex + 1}/5
             </h4>
             <span className={cn(
               "text-sm font-mono px-3 py-1 rounded font-bold",
@@ -247,7 +240,7 @@ export const MicroinstructionSequencer = ({
 
       {/* Microinstruction Timeline */}
       <div className="space-y-3">
-        <h4 className="text-lg font-bold text-foreground font-mono">6-Step Microinstruction Sequence</h4>
+        <h4 className="text-lg font-bold text-foreground font-mono">5-Step Microinstruction Sequence</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {MICROINSTRUCTIONS.map((micro, idx) => {
             const isActive = micro.phase === currentPhase;
