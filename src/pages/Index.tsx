@@ -46,8 +46,8 @@ const Index = () => {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-        {/* CPU Architecture */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
+        {/* CPU Architecture - Full Width */}
         <div className="lg:col-span-2">
           <Card className="p-6 border-border bg-card/50 backdrop-blur">
             <h2 className="text-xl font-bold font-mono text-cpu-register mb-4">CPU Architecture</h2>
@@ -58,10 +58,10 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Controls and Registers */}
-        <div className="space-y-6">
-          <Card className="p-6 border-border bg-card/50 backdrop-blur">
-            <h2 className="text-lg font-bold font-mono text-cpu-register mb-4">CPU Registers & Flags</h2>
+        {/* Controls and Registers - Side by Side */}
+        <div className="space-y-4">
+          <Card className="p-4 border-border bg-card/50 backdrop-blur">
+            <h2 className="text-base font-bold font-mono text-cpu-register mb-3">CPU Registers & Flags</h2>
             <RegisterPanel 
               currentPhase={currentPhase} 
               isExecuting={isExecuting}
@@ -71,8 +71,8 @@ const Index = () => {
             />
           </Card>
 
-          <Card className="p-6 border-border bg-card/50 backdrop-blur">
-            <h2 className="text-lg font-bold font-mono text-secondary mb-4">Instruction Setup</h2>
+          <Card className="p-4 border-border bg-card/50 backdrop-blur">
+            <h2 className="text-base font-bold font-mono text-secondary mb-3">Instruction Setup</h2>
             <InstructionEditor
               axValue={axValue}
               bxValue={bxValue}
@@ -81,24 +81,24 @@ const Index = () => {
             />
           </Card>
         </div>
-      </div>
 
-      {/* Microinstruction Sequencer */}
-      <div className="max-w-7xl mx-auto mt-6">
-        <Card className="p-6 border-border bg-card/50 backdrop-blur">
-          <h2 className="text-xl font-bold font-mono text-cpu-memory mb-4">Microinstruction Sequencer</h2>
-          <MicroinstructionSequencer
-            currentPhase={currentPhase}
-            isExecuting={isExecuting}
-            onExecutionStart={handleStartExecution}
-            onExecutionStop={handleStopExecution}
-            onRunWithoutAnimation={handleRunWithoutAnimation}
-            onPhaseChange={setCurrentPhase}
-            axValue={axValue}
-            bxValue={bxValue}
-            onFlagsUpdate={setFlags}
-          />
-        </Card>
+        {/* Microinstruction Sequencer */}
+        <div>
+          <Card className="p-4 border-border bg-card/50 backdrop-blur">
+            <h2 className="text-base font-bold font-mono text-cpu-memory mb-3">Execute Controls</h2>
+            <MicroinstructionSequencer
+              currentPhase={currentPhase}
+              isExecuting={isExecuting}
+              onExecutionStart={handleStartExecution}
+              onExecutionStop={handleStopExecution}
+              onRunWithoutAnimation={handleRunWithoutAnimation}
+              onPhaseChange={setCurrentPhase}
+              axValue={axValue}
+              bxValue={bxValue}
+              onFlagsUpdate={setFlags}
+            />
+          </Card>
+        </div>
       </div>
     </div>
   );
