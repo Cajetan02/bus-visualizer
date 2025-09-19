@@ -166,8 +166,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
             {/* Program Counter */}
             <div className={cn(
               "w-16 h-12 p-1 rounded-lg border-2 transition-all duration-500 flex flex-col items-center justify-center relative",
-              (currentPhase === "step1" || currentPhase === "step2") ? "border-cpu-control bg-cpu-control/10" : "border-border",
-              "bg-cpu-control/5"
+              "border-border bg-cpu-control/5"
             )}>
               <div className="text-xs font-mono font-bold text-cpu-control">PC</div>
               
@@ -209,7 +208,7 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
             <div className={cn(
               "w-16 h-12 p-1 rounded-lg border-2 transition-all duration-500 flex flex-col items-center justify-center relative",
               shouldGlow('mdr'),
-              "bg-cpu-memory/10 border-cpu-memory"
+              "bg-cpu-memory/10 border-border"
             )}>
               <div className="text-xs font-mono font-bold text-cpu-memory">MDR</div>
               
