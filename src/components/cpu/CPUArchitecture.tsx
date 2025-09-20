@@ -15,15 +15,15 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
     switch (currentPhase) {
       case 'step1': // PC → MAR, PC+4 → ALU
         return component === 'mar' || component === 'alu' 
-          ? 'ring-2 ring-blue-400 shadow-lg shadow-blue-400/50' : '';
+          ? 'ring-2 ring-purple-400 shadow-lg shadow-purple-400/50' : '';
       
       case 'step2': // Z → PC (ALU and MAR still active)
         return component === 'alu' || component === 'mar'
-          ? 'ring-2 ring-green-400 shadow-lg shadow-green-400/50' : '';
+          ? 'ring-2 ring-purple-400 shadow-lg shadow-purple-400/50' : '';
       
       case 'step3': // MDR → IR (only MDR, Memory, IR)
         return component === 'mdr' || component === 'ir' || component === 'memory'
-          ? 'ring-2 ring-yellow-400 shadow-lg shadow-yellow-400/50' : '';
+          ? 'ring-2 ring-purple-400 shadow-lg shadow-purple-400/50' : '';
       
       case 'step4': // AX → Y, BX → ALU (ALU, Registers, control bus)
         return component === 'registers' || component === 'alu' || component === 'bus'
@@ -165,8 +165,8 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
           <div className="flex justify-center items-center space-x-6">
             {/* Program Counter */}
             <div className={cn(
-              "w-16 h-12 p-1 rounded-lg transition-all duration-500 flex flex-col items-center justify-center relative",
-              "border border-border bg-cpu-control/5"
+              "w-16 h-12 p-1 rounded-lg border-2 transition-all duration-500 flex flex-col items-center justify-center relative",
+              "border-border bg-cpu-control/5"
             )}>
               <div className="text-xs font-mono font-bold text-cpu-control">PC</div>
               
@@ -206,9 +206,9 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
 
             {/* Memory Data Register */}
             <div className={cn(
-              "w-16 h-12 p-1 rounded-lg transition-all duration-500 flex flex-col items-center justify-center relative",
+              "w-16 h-12 p-1 rounded-lg border-2 transition-all duration-500 flex flex-col items-center justify-center relative",
               shouldGlow('mdr'),
-              "bg-cpu-memory/10 border border-border"
+              "bg-cpu-memory/10 border-cpu-memory"
             )}>
               <div className="text-xs font-mono font-bold text-cpu-memory">MDR</div>
               
