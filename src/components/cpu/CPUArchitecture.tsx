@@ -121,6 +121,15 @@ export const CPUArchitecture = ({ currentPhase, isExecuting }: CPUArchitecturePr
                 )}
               />
               
+              {/* Memory connection indicator */}
+              <text 
+                x="50%" 
+                y="95%" 
+                textAnchor="middle" 
+                className="text-xs font-mono fill-cpu-memory"
+              >
+                MEMORY
+              </text>
             </svg>
 
             {/* Main Bus Line */}
